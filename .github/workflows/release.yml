@@ -46,7 +46,9 @@ jobs:
 
     - name: Get version
       id: current
-      run: echo "::set-output name=result::$(node -p require('./package.json').version)"
+      run: |
+        CURRENT=$(node -p "require('./package.json').version")
+        echo "::set-output name=result::$CURRENT"
 
     - name: Resolve version
       uses: actions/github-script@v6
