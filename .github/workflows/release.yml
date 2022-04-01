@@ -81,7 +81,7 @@ jobs:
         npm version ${{ steps.version.outputs.result }} --no-git-tag-version
         git config user.name "${GITHUB_ACTOR}"
         git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-        git commit -m "chore(release): bump version"
+        git commit -am "chore(release): bump version"
         git push
         git tag "${TAG_VERSION}"
         git push origin "${TAG_VERSION}"
@@ -92,9 +92,9 @@ jobs:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       run: npm publish
 
-    - name: Bump version
+    - name: Bump workflow
       # update this workflow
       run: |
-        git commit -m "chore(release): bump version"
+        git commit -m "chore(release): bump workflow"
         git push
  
