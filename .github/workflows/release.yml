@@ -77,7 +77,7 @@ jobs:
 
     - name: Bump version and tag
       run: |
-        TAG_VERSION=$(echo ${{ steps.version.outputs.result }} | tr '.' '_')
+        TAG_VERSION="${{ steps.version.outputs.result }}"
         npm version "$TAG_VERSION" --no-git-tag-version
         git config user.name "${GITHUB_ACTOR}"
         git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
