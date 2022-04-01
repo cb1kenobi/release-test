@@ -1,6 +1,6 @@
 {
   "name": "@cb1kenobi/release-test",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "exports": "./index.js",
   "scripts": {
