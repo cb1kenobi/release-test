@@ -83,6 +83,9 @@ jobs:
       id: tarball
       run: npm pack 2> /dev/null
 
+    - name: Check
+      run: echo ${{ steps.tarball.outputs.result }} && ls ${{ steps.tarball.outputs.result }}
+
     - name: Archive package
       uses: actions/upload-artifact@v3
       with:
