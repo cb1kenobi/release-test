@@ -81,14 +81,11 @@ jobs:
 
     - name: Package tarball
       id: tarball
-      run: npm pack 2> /dev/null
+      run: echo "::set-output name=result::$(npm pack 2> /dev/null)"
 
     - name: Check tarball
       run: echo ${{ steps.tarball.outputs.result }}
       
-    - name: Check directory
-      run: ls -la ${{ steps.tarball.outputs.result }}
-
     - name: Archive package
       uses: actions/upload-artifact@v3
       with:
@@ -115,9 +112,7 @@ jobs:
     #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     #   run: npm publish ${{ needs.prepare.outputs.tarball }}
 
-    # git commit
-    # git tag
-    # git push
     # update this workflow
     # git commit
+    # git tag
     # git push
