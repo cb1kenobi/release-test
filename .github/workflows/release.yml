@@ -100,16 +100,23 @@ jobs:
       with:
         name: ${{ needs.prepare.outputs.tarball }}
     
-    - name: Publish to npm
-      run: echo ${{ needs.prepare.outputs.version }} && echo ${{ needs.prepare.outputs.tarball }} 
-    
-    # - name: Publish to npm
-    #   env:
-    #     GH_TOKEN: ${{ github.token }}
-    #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-    #   run: npm publish ${{ needs.prepare.outputs.tarball }}
+    - name: Tagging release
+      run: |
+        TAG_VERSION=$( echo ${{ needs.prepare.outputs.version }} | tr '.' '_' )
+        git config user.name "${GITHUB_ACTOR}"
+        git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+        git tag "${TAG_VERSION}"
+        git push origin "${TAG_VERSION}"
 
-    # update this workflow
-    # git commit
-    # git tag
-    # git push
+    - name: Publish to npm
+      env:
+        GH_TOKEN: ${{ github.token }}
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: npm publish ${{ needs.prepare.outputs.tarball }}
+
+    - name: Bump version
+      # update this workflow
+      run: |
+        git commit -m "chore(release): bump version"
+        git push
+ 
