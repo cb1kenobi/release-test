@@ -25,9 +25,9 @@ on:
         required: false
 
 jobs:
-  prepare:
+  publish:
     runs-on: ubuntu-latest
-    name: Prepare
+    name: Package and publish
     outputs:
       version: ${{ steps.version.outputs.result }}
       tarball: ${{ steps.tarball.outputs.result }}
@@ -77,34 +77,12 @@ jobs:
 
     - name: Bump version and tag
       run: |
-        npm version ${{ steps.version.outputs.result }} --no-git-tag-version
-
-    - name: Package tarball
-      id: tarball
-      run: echo "::set-output name=result::$(npm pack 2> /dev/null)"
-
-    - name: Archive package
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ steps.tarball.outputs.result }}
-        path: ${{ steps.tarball.outputs.result }}
-
-  publish:
-    runs-on: ubuntu-latest
-    name: Publish
-    environment: Release
-    needs: [ prepare ]
-    steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: ${{ needs.prepare.outputs.tarball }}
-    
-    - name: Tagging release
-      run: |
         TAG_VERSION=$( echo ${{ needs.prepare.outputs.version }} | tr '.' '_' )
+        npm version ${{ steps.version.outputs.result }} --no-git-tag-version
         git config user.name "${GITHUB_ACTOR}"
         git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+        git commit -m "chore(release): bump version"
+        git push
         git tag "${TAG_VERSION}"
         git push origin "${TAG_VERSION}"
 
@@ -112,7 +90,7 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      run: npm publish ${{ needs.prepare.outputs.tarball }}
+      run: npm publish
 
     - name: Bump version
       # update this workflow
