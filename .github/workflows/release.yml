@@ -77,11 +77,11 @@ jobs:
 
     - name: Bump version and tag
       run: |
-        TAG_VERSION=$( echo ${{ needs.prepare.outputs.version }} | tr '.' '_' )
-        npm version ${{ steps.version.outputs.result }} --no-git-tag-version
+        TAG_VERSION=$(echo ${{ steps.version.outputs.result }} | tr '.' '_')
+        npm version "$TAG_VERSION" --no-git-tag-version
         git config user.name "${GITHUB_ACTOR}"
         git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-        git commit -am "chore(release): bump version"
+        git commit -am "chore(release): bump version $TAG_VERSION"
         git push
         git tag "${TAG_VERSION}"
         git push origin "${TAG_VERSION}"
