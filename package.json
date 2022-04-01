@@ -1,0 +1,11 @@
+{
+  "name": "@cb1kenobi/release-test",
+  "version": "2.3.3-3",
+  "description": "",
+  "exports": "./index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Chris Barber <me@chrisbarber.dev>",
+  "license": "MIT"
+}
