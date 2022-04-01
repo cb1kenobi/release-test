@@ -83,9 +83,6 @@ jobs:
       id: tarball
       run: echo "::set-output name=result::$(npm pack 2> /dev/null)"
 
-    - name: Check tarball
-      run: echo ${{ steps.tarball.outputs.result }}
-      
     - name: Archive package
       uses: actions/upload-artifact@v3
       with:
@@ -104,7 +101,7 @@ jobs:
         name: ${{ needs.prepare.outputs.tarball }}
     
     - name: Publish to npm
-      run: echo ${{ needs.prepare.outputs.tarball }} && echo ${{ needs.prepare.outputs.tarball }} 
+      run: echo ${{ needs.prepare.outputs.version }} && echo ${{ needs.prepare.outputs.tarball }} 
     
     # - name: Publish to npm
     #   env:
