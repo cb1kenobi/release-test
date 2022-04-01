@@ -1,0 +1,117 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: The branch to release from
+        required: true
+        default: master
+      version:
+        description: Select a new version
+        required: true
+        default: '1.0.1'
+        type: choice
+        options:
+        - 'Patch (1.0.1)'
+        - 'Minor (1.1.0)'
+        - 'Major (2.0.0)'
+        - 'Prepatch (1.0.1-alpha.0)'
+        - 'Preminor (1.1.0-alpha.0)'
+        - 'Premajor (2.0.0-alpha.0)'
+        - 'Custom Version'
+      custom-version:
+        description: Custom version
+        required: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    name: Prepare
+    outputs:
+      version: ${{ steps.version.outputs.result }}
+      tarball: ${{ steps.tarball.outputs.result }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: ${{ github.event.inputs.branch }}
+
+    - name: Setup node
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Resolve version
+      uses: actions/github-script@v6
+      id: version
+      with:
+        script: |
+          let version = '${{ github.event.inputs.version }}';
+          if (version === 'Custom Version') {
+            version = '${{ github.event.inputs.custom-version }}';
+          } else {
+            version = version.replace(/^\w+ \((.+)\)$/, '$1');
+          }
+
+          const releaseMeta = github.rest.repos.listReleases.endpoint.merge({
+            owner: context.repo.owner,
+            repo: context.repo.repo
+          });
+
+          const releases = await github.paginate(releaseMeta);
+          for (const release of releases) {
+            if (release.name === version) {
+              throw new Error(`${version} already exists!`);
+            }
+          }
+
+          console.log(`Setting version: ${version}`);
+          return version;
+
+    - name: Install dependencies
+      run: npm ci
+      if: steps.node-cache.outputs.cache-hit != 'true'
+
+    - name: Bump version and tag
+      run: |
+        npm version ${{ steps.version.outputs.result }} --no-git-tag-version
+
+    - name: Package tarball
+      id: tarball
+      run: npm pack 2> /dev/null
+
+    - name: Archive package
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ steps.tarball.outputs.result }}
+        path: ${{ steps.tarball.outputs.result }}
+
+  publish:
+    runs-on: ubuntu-latest
+    name: Publish
+    environment: Release
+    needs: [ prepare ]
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ needs.prepare.outputs.tarball }}
+    
+    - name: Publish to npm
+      run: echo ${{ needs.prepare.outputs.tarball }} && echo ${{ needs.prepare.outputs.tarball }} 
+    
+    # - name: Publish to npm
+    #   env:
+    #     GH_TOKEN: ${{ github.token }}
+    #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    #   run: npm publish ${{ needs.prepare.outputs.tarball }}
+
+    # git commit
+    # git tag
+    # git push
+    # update this workflow
+    # git commit
+    # git push
