@@ -101,7 +101,8 @@ jobs:
     - name: Bump workflow
       run: |
         npm i -g @cb1kenobi/increment-release-yaml
-        increment-release-yaml "${{ steps.version.outputs.result }}" ".github/workflows/release.yml"
+        increment-release-yaml ${{ steps.version.outputs.result }} .github/workflows/release.yml
+        git add .github/workflows/release.yml
         git commit -m "chore(release): bump workflow"
         git push
  
